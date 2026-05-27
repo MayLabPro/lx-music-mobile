@@ -1,4 +1,9 @@
 import apiSourceInfo from './api-source-info'
+import huibqApis from './builtinApi/huibq'
+import ikunApis from './builtinApi/ikun'
+import lxmusicApis from './builtinApi/lxmusic'
+import nyaApis from './builtinApi/nya'
+import yyxzqApis from './builtinApi/yyxzq'
 
 // import temp_api_kw from './kw/api-temp'
 // import test_api_kg from './kg/api-test'
@@ -17,6 +22,11 @@ import settingState from '@/store/setting/state'
 
 
 const apiList = {
+  ...huibqApis,
+  ...ikunApis,
+  ...lxmusicApis,
+  ...nyaApis,
+  ...yyxzqApis,
   // temp_api_kw,
   // // test_api_bd: require('./bd/api-test'),
   // test_api_kg,

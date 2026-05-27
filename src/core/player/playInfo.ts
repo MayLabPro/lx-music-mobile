@@ -4,6 +4,11 @@ import playerState from '@/store/player/state'
 import { getListMusicSync } from '@/utils/listManage'
 import { setProgress } from '@/core/player/progress'
 import { LIST_IDS } from '@/config/constant'
+import { getDownloadListSync } from '@/core/download'
+
+const getTargetList = (listId: string | null): LX.Music.MusicInfo[] | LX.Download.ListItem[] => {
+  return listId == LIST_IDS.DOWNLOAD ? getDownloadListSync() : getListMusicSync(listId)
+}
 
 
 export const setMusicInfo = (musicInfo: Partial<LX.Player.MusicInfo>) => {
@@ -40,7 +45,7 @@ export const getPlayIndex = (listId: string | null, musicInfo: LX.Download.ListI
   playerPlayIndex: number
 } => {
   const { playInfo } = playerState
-  const playerList = getListMusicSync(playInfo.playerListId)
+  const playerList = getTargetList(playInfo.playerListId)
 
   // if (listIndex < 0) throw new Error('music info not found')
   // playInfo.playIndex = listIndex
@@ -51,7 +56,7 @@ export const getPlayIndex = (listId: string | null, musicInfo: LX.Download.ListI
     playerPlayIndex = Math.min(playInfo.playerPlayIndex, playerList.length - 1)
   }
 
-  const list = getListMusicSync(listId)
+  const list = getTargetList(listId)
   if (list.length && musicInfo) {
     const currentId = musicInfo.id
     playIndex = list.findIndex(m => m.id == currentId)
@@ -137,6 +142,5 @@ export const setPlayMusicInfo = (listId: string | null, musicInfo: LX.Download.L
 }
 
 export const getList = (listId: string | null): LX.Music.MusicInfo[] | LX.Download.ListItem[] => {
-  // return listId == LIST_ID_DOWNLOAD ? downloadList : getListMusicSync(listId)
-  return listId == LIST_IDS.DOWNLOAD ? [] : getListMusicSync(listId)
+  return getTargetList(listId)
 }

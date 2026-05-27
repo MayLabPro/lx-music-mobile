@@ -16,11 +16,12 @@ import Text from '@/components/common/Text'
 import { useTheme } from '@/store/theme/hook'
 // import { importUserApi, removeUserApi } from '@/core/userApi'
 
-const apiSourceList = apiSourceInfo.map(api => ({
-  id: api.id,
-  name: api.name,
-  disabled: api.disabled,
-}))
+const apiSourceList = apiSourceInfo
+  .filter(api => !api.disabled)
+  .map(api => ({
+    id: api.id,
+    name: api.name,
+  }))
 
 const useActive = (id: string) => {
   const activeLangId = useSettingValue('common.apiSource')

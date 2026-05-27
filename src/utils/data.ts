@@ -25,6 +25,7 @@ const syncAuthKeyPrefix = storageDataPrefix.syncAuthKey
 const syncHostPrefix = storageDataPrefix.syncHost
 const syncHostHistoryPrefix = storageDataPrefix.syncHostHistory
 const listPrefix = storageDataPrefix.list
+const downloadListKey = storageDataPrefix.downloadList
 const dislikeListPrefix = storageDataPrefix.dislikeList
 const userApiPrefix = storageDataPrefix.userApi
 const openStoragePathPrefix = storageDataPrefix.openStoragePath
@@ -337,6 +338,14 @@ export const removeListMusics = async(ids: string[]): Promise<void> => {
   }
   // await saveData(listSortPrefix, global.lx.listSort)
   // delaySaveListScrollPosition(global.lx.listScrollPosition)
+}
+
+export const getDownloadList = async(): Promise<LX.Download.ListItem[]> => {
+  return await getData<LX.Download.ListItem[]>(downloadListKey) ?? []
+}
+
+export const saveDownloadList = async(list: LX.Download.ListItem[]) => {
+  await saveData(downloadListKey, list)
 }
 
 

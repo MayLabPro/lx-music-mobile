@@ -4,6 +4,7 @@ import { checkUrl } from '@/utils/request'
 import playerState from '@/store/player/state'
 import { isCached } from '@/plugins/player/utils'
 
+const isHttpUrl = (url: string) => /^https?:\/\//i.test(url)
 
 const preloadMusicInfo = {
   isLoading: false,
@@ -18,21 +19,25 @@ const resetPreloadInfo = () => {
 const preloadNextMusicUrl = async(curTime: number) => {
   if (preloadMusicInfo.isLoading || curTime - preloadMusicInfo.preProgress < 3) return
   preloadMusicInfo.isLoading = true
-  console.log('preload next music url')
-  const info = await getNextPlayMusicInfo()
-  if (info) {
-    preloadMusicInfo.info = info
-    const url = await getMusicUrl({ musicInfo: info.musicInfo }).catch(() => '')
-    if (url) {
-      console.log('preload url', url)
-      const [cached, available] = await Promise.all([isCached(url), checkUrl(url).then(() => true).catch(() => false)])
-      if (!cached && !available) {
-        const url = await getMusicUrl({ musicInfo: info.musicInfo, isRefresh: true }).catch(() => '')
-        console.log('preload url refresh', url)
+  try {
+    console.log('preload next music url')
+    const info = await getNextPlayMusicInfo()
+    if (info) {
+      preloadMusicInfo.info = info
+      const url = await getMusicUrl({ musicInfo: info.musicInfo }).catch(() => '')
+      if (url) {
+        console.log('preload url', url)
+        if (!isHttpUrl(url)) return
+        const [cached, available] = await Promise.all([isCached(url), checkUrl(url).then(() => true).catch(() => false)])
+        if (!cached && !available) {
+          const url = await getMusicUrl({ musicInfo: info.musicInfo, isRefresh: true }).catch(() => '')
+          console.log('preload url refresh', url)
+        }
       }
     }
+  } finally {
+    preloadMusicInfo.isLoading = false
   }
-  preloadMusicInfo.isLoading = false
 }
 
 export default () => {

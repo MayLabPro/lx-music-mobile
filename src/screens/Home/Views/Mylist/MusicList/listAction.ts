@@ -11,6 +11,7 @@ import type { SelectInfo } from './ListMenu'
 import { type Metadata } from '@/components/MetadataEditModal'
 import musicSdk from '@/utils/musicSdk'
 import { getListMusicSync } from '@/utils/listManage'
+import { addDownloads, showDownloadQueuedTip } from '@/core/download'
 
 export const handlePlay = (listId: SelectInfo['listId'], index: SelectInfo['index']) => {
   void playList(listId, index)
@@ -21,6 +22,18 @@ export const handlePlayLater = (listId: SelectInfo['listId'], musicInfo: SelectI
     onCancelSelect()
   } else {
     addTempPlayList([{ listId, musicInfo }])
+  }
+}
+
+export const handleDownload = async(musicInfo: SelectInfo['musicInfo'], selectedList: SelectInfo['selectedList'], onCancelSelect: () => void) => {
+  if (selectedList.length) {
+    const onlineList = selectedList.filter(musicInfo => musicInfo.source != 'local') as LX.Music.MusicInfoOnline[]
+    const count = await addDownloads(onlineList)
+    showDownloadQueuedTip(count)
+    onCancelSelect()
+  } else {
+    if (musicInfo.source == 'local') return
+    showDownloadQueuedTip(await addDownloads([musicInfo]))
   }
 }
 

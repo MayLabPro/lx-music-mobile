@@ -8,6 +8,11 @@ import apiSourceInfo from '@/utils/musicSdk/api-source-info'
 
 
 export const setApiSource = (apiId: string) => {
+  const targetApiId = /^user_api/.test(apiId)
+    ? apiId
+    : apiSourceInfo.some(api => api.id == apiId && !api.disabled)
+      ? apiId
+      : apiSourceInfo.find(api => !api.disabled)?.id ?? apiId
   if (global.lx.apiInitPromise[1]) {
     global.lx.apiInitPromise[0] = new Promise(resolve => {
       global.lx.apiInitPromise[1] = false
@@ -17,8 +22,8 @@ export const setApiSource = (apiId: string) => {
       }
     })
   }
-  if (/^user_api/.test(apiId)) {
-    setUserApi(apiId).catch(err => {
+  if (/^user_api/.test(targetApiId)) {
+    setUserApi(targetApiId).catch(err => {
       if (!global.lx.apiInitPromise[1]) global.lx.apiInitPromise[2](false)
       console.log(err)
       let api = apiSourceInfo.find(api => !api.disabled)
@@ -27,17 +32,17 @@ export const setApiSource = (apiId: string) => {
     })
   } else {
     // @ts-expect-error
-    global.lx.qualityList = musicSdk.supportQuality[apiId] ?? {}
+    global.lx.qualityList = musicSdk.supportQuality[targetApiId] ?? {}
     destroyUserApi()
     if (!global.lx.apiInitPromise[1]) global.lx.apiInitPromise[2](true)
     // apiSource.value = apiId
     // void setUserApiAction(apiId)
   }
 
-  if (apiId != settingState.setting['common.apiSource']) {
-    updateSetting({ 'common.apiSource': apiId })
+  if (targetApiId != settingState.setting['common.apiSource']) {
+    updateSetting({ 'common.apiSource': targetApiId })
     requestAnimationFrame(() => {
-      global.state_event.apiSourceUpdated(apiId)
+      global.state_event.apiSourceUpdated(targetApiId)
     })
   }
 }
