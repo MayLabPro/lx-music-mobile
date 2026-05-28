@@ -1,0 +1,57 @@
+name: Android Package
+
+on:
+  push:
+    branches:
+      - lx-music-mobile
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        uses: ./.github/actions/setup
+
+      - name: Get package version
+        shell: bash
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_ENV"
+
+      - name: Build debug packages
+        env:
+          DISABLE_SVG: 1
+        shell: bash
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd android/app/build/outputs/apk/debug
+          sha256sum *.apk > SHA256SUMS.txt
+          ls -lh
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lx-music-mobile-debug-v${{ env.PACKAGE_VERSION }}-${{ github.run_number }}
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
