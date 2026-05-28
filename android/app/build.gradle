@@ -62,6 +62,7 @@ react {
  * and want to have separate APKs to upload to the Play Store.
  */
 def enableSeparateBuildPerCPUArchitecture = true
+def enableUniversalApk = project.hasProperty("universalApk") ? project.property("universalApk").toBoolean() : true
 
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
@@ -121,7 +122,7 @@ android {
         abi {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
-            universalApk true  // If true, also generate a universal APK
+            universalApk enableUniversalApk  // If true, also generate a universal APK
             include (*reactNativeArchitectures())
         }
     }

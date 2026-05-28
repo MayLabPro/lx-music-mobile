@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   package:
-    name: Build debug APK
+    name: Build arm64-v8a debug APK
     runs-on: ubuntu-latest
 
     steps:
@@ -37,21 +37,21 @@ jobs:
         shell: bash
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace -PreactNativeArchitectures=arm64-v8a -PuniversalApk=false
 
       - name: Generate checksums
         shell: bash
         run: |
           cd android/app/build/outputs/apk/debug
-          sha256sum *.apk > SHA256SUMS.txt
+          sha256sum lx-music-mobile-v${PACKAGE_VERSION}-arm64-v8a.apk > SHA256SUMS.txt
           ls -lh
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lx-music-mobile-debug-v${{ env.PACKAGE_VERSION }}-${{ github.run_number }}
+          name: lx-music-mobile-arm64-v8a-debug-v${{ env.PACKAGE_VERSION }}-${{ github.run_number }}
           path: |
-            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/debug/lx-music-mobile-v${{ env.PACKAGE_VERSION }}-arm64-v8a.apk
             android/app/build/outputs/apk/debug/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
