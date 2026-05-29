@@ -170,8 +170,11 @@ const fetchData = (url, { timeout = 15000, ...options }) => {
   console.log('---start---', url)
 
   const controller = new global.AbortController()
+  let isTimeout = false
+  let isCanceled = false
   let id = BackgroundTimer.setTimeout(() => {
     id = null
+    isTimeout = true
     controller.abort()
   }, timeout)
 
@@ -204,6 +207,9 @@ const fetchData = (url, { timeout = 15000, ...options }) => {
         }
       }).catch(err => {
         // console.log(err, err.code, err.message)
+        if (err.message === 'Aborted' && isCanceled && !isTimeout) {
+          return Promise.reject(new Error(requestMsg.cancelRequest))
+        }
         return Promise.reject(err)
       }).finally(() => {
         if (id == null) return
@@ -211,6 +217,7 @@ const fetchData = (url, { timeout = 15000, ...options }) => {
       })
     }),
     abort() {
+      isCanceled = true
       controller.abort()
     },
   }
